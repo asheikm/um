@@ -3,8 +3,10 @@ package main
 import (
 	// "um/config"
 	// "um/handlers"
-	// "um/middleware"
+	"um/middleware"
 	"um/routes"
+
+	"github.com/casbin/casbin"
 
 	"github.com/gin-gonic/gin"
 )
@@ -12,9 +14,9 @@ import (
 func main() {
 	r := gin.Default()
 
-	// Add middleware (if applicable)
-	// r.Use(middleware.Cors())
-	// r.Use(middleware.JWTAuth())
+	enforcer := casbin.NewEnforcer("models/model.conf", "models/policy.csv")
+
+	r.Use(middleware.RBACMiddleware(enforcer))
 
 	routes := routes.GetRoutes()
 	// Iterate over routes and register them

@@ -24,4 +24,7 @@ type User struct {
 
 	// Project specfic
 	ProjectName string `json:"projectName"`
+
+	// Role
+	Role string `json:"role"`
 }
