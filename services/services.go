@@ -1,4 +1,4 @@
-package repositories
+package services
 
 import (
 	"errors"
@@ -8,26 +8,26 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-type UserRepository interface {
+type UserService interface {
 	CreateUser(*models.User) error
 	GetUserByID(int64) (*models.User, error)
 	UpdateUser(*models.User) error
 	DeleteUser(int64) error
 }
 
-type gormUserRepository struct {
+type gormUserService struct {
 	db *gorm.DB
 }
 
-func NewGormUserRepository(db *gorm.DB) UserRepository {
-	return &gormUserRepository{db: db}
+func NewGormUserService(db *gorm.DB) UserService {
+	return &gormUserService{db: db}
 }
 
-func (r *gormUserRepository) CreateUser(user *models.User) error {
+func (r *gormUserService) CreateUser(user *models.User) error {
 	return r.db.Create(user).Error
 }
 
-func (r *gormUserRepository) GetUserByID(id int64) (*models.User, error) {
+func (r *gormUserService) GetUserByID(id int64) (*models.User, error) {
 	var user models.User
 	err := r.db.Where("id = ?", id).First(&user).Error
 	if err == gorm.ErrRecordNotFound {
@@ -36,13 +36,13 @@ func (r *gormUserRepository) GetUserByID(id int64) (*models.User, error) {
 	return &user, err
 }
 
-func (r *gormUserRepository) UpdateUser(user *models.User) error {
+func (r *gormUserService) UpdateUser(user *models.User) error {
 	if user.ID == 0 {
 		return errors.New("user ID cannot be zero for update")
 	}
 	return r.db.Model(&models.User{ID: user.ID}).Updates(user).Error
 }
 
-func (r *gormUserRepository) DeleteUser(id int64) error {
+func (r *gormUserService) DeleteUser(id int64) error {
 	return r.db.Delete(&models.User{ID: id}).Error
 }

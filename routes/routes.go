@@ -3,7 +3,7 @@ package routes
 import (
 	"um/db"
 	"um/handlers"
-	"um/repositories"
+	"um/services"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,28 +14,28 @@ type Route struct {
 	HandlerFunc gin.HandlerFunc
 }
 
-var userRepository repositories.UserRepository
+var userService services.UserService
 
 func init() {
 	db.InitDB()
-	userRepository = repositories.NewGormUserRepository(db.GetDB())
+	userService = services.NewGormUserService(db.GetDB())
 }
 
 var userRoutes = map[string]Route{
 	"/signup": {
 		Method:      "POST",
 		Path:        "/signup",
-		HandlerFunc: handlers.NewUserHandler(userRepository).Signup,
+		HandlerFunc: handlers.NewUserHandler(userService).Signup,
 	},
 	"/login": {
 		Method:      "POST",
 		Path:        "/login",
-		HandlerFunc: handlers.NewUserHandler(userRepository).Login,
+		HandlerFunc: handlers.NewUserHandler(userService).Login,
 	},
 	"/me": {
 		Method:      "GET",
 		Path:        "/me",
-		HandlerFunc: handlers.NewUserHandler(userRepository).GetMe,
+		HandlerFunc: handlers.NewUserHandler(userService).GetMe,
 	},
 }
 

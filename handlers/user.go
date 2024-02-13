@@ -6,18 +6,18 @@ import (
 	"fmt"
 	"io"
 	"um/models"
-	"um/repositories"
+	"um/services"
 
 	"github.com/gin-gonic/gin"
 )
 
 type UserHandler struct {
-	UserRepository repositories.UserRepository // Add UserRepository dependency
+	UserService services.UserService
 }
 
-func NewUserHandler(userRepository repositories.UserRepository) *UserHandler {
+func NewUserHandler(userService services.UserService) *UserHandler {
 	return &UserHandler{
-		UserRepository: userRepository,
+		UserService: userService,
 	}
 }
 
@@ -39,7 +39,7 @@ func (h *UserHandler) Signup(c *gin.Context) {
 
 	// TODO: Validate user data if needed (e.g., check for empty fields)
 
-	err = h.UserRepository.CreateUser(&user)
+	err = h.UserService.CreateUser(&user)
 	if err != nil {
 		// Handle error
 		return
