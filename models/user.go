@@ -17,9 +17,9 @@ type User struct {
 	FirstName            string
 	LastName             string
 	Organization         string
-	Experience           string
-	AreasOfExpertise     []string `gorm:"type:text"`
-	Certifications       []string `gorm:"type:text"`
+	Experience           int32
+	AreasOfExpertise     string
+	Certifications       string
 	TwoFactorAuthEnabled bool
 	ProjectName          string
 	Role                 string
