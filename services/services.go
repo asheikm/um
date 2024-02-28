@@ -40,9 +40,9 @@ func (r *gormUserService) UpdateUser(user *models.User) error {
 	if user.ID == 0 {
 		return errors.New("user ID cannot be zero for update")
 	}
-	return r.db.Model(&models.User{ID: user.ID}).Updates(user).Error
+	return r.db.Model(&models.User{}).Where("id = ?", user.ID).Updates(user).Error
 }
 
 func (r *gormUserService) DeleteUser(id int64) error {
-	return r.db.Delete(&models.User{ID: id}).Error
+	return r.db.Delete(&models.User{}, id).Error
 }
