@@ -1,7 +1,6 @@
 package main
 
 import (
-	// "um/config"
 	"um/handlers"
 	"um/middleware"
 	"um/routes"
