@@ -1,9 +1,9 @@
 package db
 
 import (
-	"fmt"
 	"um/models"
 
+	"github.com/rs/zerolog/log"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -15,10 +15,13 @@ func InitDB() {
 	dsn := "host=localhost user=postgres password=root dbname=users port=5432 sslmode=disable"
 	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		fmt.Printf("Failed to connect to database: %v", err)
-		panic("Failed to connect to database")
+		log.Error().Msgf("Failed to connect to database: %v", err)
+		err = db.Exec("CREATE DATABASE users").Error
+		if err != nil {
+			panic("failed to create database")
+		}
 	}
-
+	log.Info().Msg("Connected to db...")
 	// Create the table
 	db.AutoMigrate(&models.User{})
 }

@@ -1,13 +1,15 @@
 package handlers
 
 import (
-	//"encoding/json"
 	"fmt"
 	"net/http"
 
-	// "io"
+	"crypto/sha256"
+	"encoding/hex"
 	"um/models"
 	"um/services"
+
+	"github.com/dgrijalva/jwt-go"
 
 	"github.com/gin-gonic/gin"
 )
@@ -47,36 +49,63 @@ func (h *UserHandler) Signup(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "User created successfully"})
 }
 
-/*
-func (h *UserHandler) Signup(c *gin.Context) {
-	var user models.User
+func checkPassword(storedPassword, inputPassword string) bool {
+	// Hash the input password using SHA-256
+	hashedStoredPassword := hashPassword(storedPassword)
+	inputPasswordHash := hashPassword(inputPassword)
+	return hashedStoredPassword == inputPasswordHash
+}
 
-	body, err := io.ReadAll(c.Request.Body)
+func hashPassword(password string) string {
+	// Hash the password using SHA-256
+	hasher := sha256.New()
+	hasher.Write([]byte(password))
+	hashedPassword := hex.EncodeToString(hasher.Sum(nil))
+	return hashedPassword
+}
+
+func generateToken(user *models.User) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"username": user.Username,
+		// Add any additional claims as needed
+	})
+
+	// Sign the token with a secret key
+	tokenString, err := token.SignedString([]byte("secret"))
 	if err != nil {
-		// Handle error reading body
-		return
+		return "", err
 	}
 
-	fmt.Println("Received JSON data:", string(body))
+	return tokenString, nil
+}
 
-	if err := c.ShouldBindJSON(&user); err != nil {
+func (h *UserHandler) Login(c *gin.Context) {
+	var loginReq models.LoginRequest
+	if err := c.ShouldBindJSON(&loginReq); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON data"})
 		return
 	}
 
-	// TODO: Validate user data if needed (e.g., check for empty fields)
-	fmt.Println("Creating user...")
-	err = h.UserService.CreateUser(&user)
+	// Validate loginReq fields if needed
+
+	user, err := h.UserService.GetUserByUsername(loginReq.Username)
 	if err != nil {
-		// Handle error
-		fmt.Println(err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
 		return
 	}
-	c.JSON(http.StatusCreated, gin.H{"message": "User created successfully"})
-}*/
 
-func (h *UserHandler) Login(c *gin.Context) {
-	// ... handle user login
+	if !checkPassword(user.Password, loginReq.Password) {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})
+		return
+	}
+
+	token, err := generateToken(user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"token": token})
 }
 
 func (h *UserHandler) GetMe(c *gin.Context) {

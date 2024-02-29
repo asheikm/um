@@ -6,12 +6,14 @@ import (
 
 	"um/models"
 
+	"github.com/rs/zerolog/log"
 	"gorm.io/gorm"
 )
 
 type UserService interface {
 	CreateUser(*models.User) error
 	GetUserByID(int64) (*models.User, error)
+	GetUserByUsername(string) (*models.User, error)
 	UpdateUser(*models.User) error
 	DeleteUser(int64) error
 }
@@ -27,6 +29,19 @@ func NewGormUserService(db *gorm.DB) UserService {
 func (r *gormUserService) CreateUser(user *models.User) error {
 	fmt.Println("Creating user for signup...")
 	return r.db.Create(&user).Error
+}
+
+func (r *gormUserService) GetUserByUsername(username string) (*models.User, error) {
+	var user models.User
+	err := r.db.Where("username = ?", username).First(&user).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	log.Info().Msgf("User queried info: %v", user)
+	return &user, nil
 }
 
 func (r *gormUserService) GetUserByID(id int64) (*models.User, error) {
