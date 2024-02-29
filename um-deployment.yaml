@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: um
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: um
+  template:
+    metadata:
+      labels:
+        app: um
+    spec:
+      containers:
+        - name: um
+          image: um:latest
+          ports:
+            - containerPort: 8080
