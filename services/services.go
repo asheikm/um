@@ -4,10 +4,9 @@ import (
 	"errors"
 	"fmt"
 
-	//"strings"
 	"um/models"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 type UserService interface {
@@ -27,8 +26,6 @@ func NewGormUserService(db *gorm.DB) UserService {
 
 func (r *gormUserService) CreateUser(user *models.User) error {
 	fmt.Println("Creating user for signup...")
-	// user.AreasOfExpertise = strings.Join(user.AreasOfExpertise, ",")
-	// user.Certifications = strings.Join(user.Certifications, ",")
 	return r.db.Create(&user).Error
 }
 
